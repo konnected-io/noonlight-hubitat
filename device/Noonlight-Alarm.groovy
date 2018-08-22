@@ -35,7 +35,7 @@ metadata {
 //    }
 //    main "view"
 //    details "switch"
-  }
+//  }
 }
 
 def off() {

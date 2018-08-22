@@ -60,10 +60,10 @@ def pageConfiguration() {
         }
       }
   } else {
-    dynamicPage(name: "pageConfiguration") {
-      section {
-        paragraph("You are connected to Noonlight!",
-          image:       "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
+    page(name: "pageConfiguration") {
+      section("Configuration") {
+        paragraph "You are connected to Noonlight!",
+          image:  "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
       }
 
       section("Sensors") {
