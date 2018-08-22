@@ -21,18 +21,20 @@ metadata {
 
   preferences {  }
 
-  tiles(scale: 2) {
-  	valueTile("view", "device.switch", decoration: "flat") {
-      state ("off", icon: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png", label: "Standby")
-      state ("on", icon: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png", label: "Alarm!", backgroundColor:"#166efb")
-    }
-    standardTile("switch", "device.switch", decoration: "flat", width: 6, height: 4) {
-      state "off",  label: "Standby", icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", action:"switch.on", backgroundColor:"#ffffff", nextState: "turningOn"
-      state "on", label: "Alarm in Progress", icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", backgroundColor:"#344351", nextState: "turningOff"
-      state "turningOn", label:'Activating', icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", backgroundColor:"#166efb", nextState: "turningOff"
-    }
-    main "view"
-    details "switch"
+/*** HE does not use tiles or simulated ***/
+
+//  tiles(scale: 2) {
+//  	valueTile("view", "device.switch", decoration: "flat") {
+//      state ("off", icon: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png", label: "Standby")
+//      state ("on", icon: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png", label: "Alarm!", backgroundColor:"#166efb")
+//    }
+//    standardTile("switch", "device.switch", decoration: "flat", width: 6, height: 4) {
+//      state "off",  label: "Standby", icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", action:"switch.on", backgroundColor:"#ffffff", nextState: "turningOn"
+//      state "on", label: "Alarm in Progress", icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", backgroundColor:"#344351", nextState: "turningOff"
+//      state "turningOn", label:'Activating', icon:"https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png", backgroundColor:"#166efb", nextState: "turningOff"
+//    }
+//    main "view"
+//    details "switch"
   }
 }
 
