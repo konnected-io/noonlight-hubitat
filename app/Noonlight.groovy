@@ -19,12 +19,12 @@ import groovy.json.JsonOutput
 public static String version() { return "1.0.0" }
 
 // Live
-public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
-public static String authBrokerUri() { return "https://noonlight.konnected.io/st/auth/" }
+//public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
+//public static String authBrokerUri() { return "https://noonlight.konnected.io/st/auth/" }
 
 // Sandbox
-// public static String noonlightApiBase() { return "https://api-sandbox.safetrek.io/v1/" }
-// public static String authBrokerUri() { return "https://konnected-noonlight.herokuapp.com/st/auth/" }
+ public static String noonlightApiBase() { return "https://${api_host}/${hub_id}/apps/${app_id}/noonlight/token" }
+ public static String authBrokerUri() { return "https://konnected-noonlight.herokuapp.com/he/auth?hub_id=${hub_id}&app_id=${app_id}&api_host=${api_host}&access_token=${state.accessToken}" }
 
 definition(
     name: "Noonlight",
@@ -54,7 +54,7 @@ def pageConfiguration() {
             image:       "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png",
             title:       "Connect Noonlight",
             description: "Sign in or sign up to get started",
-            url:         "${authBrokerUri()}?app_id=${app.id}&api_host=${apiServerUrl}&access_token=${state.accessToken}",
+            url:         "${authBrokerUri()}?app_id=${app_id}&api_host=${getApiServerUrl}&access_token=${state.accessToken}",
             style: "embedded"
           )
         }
