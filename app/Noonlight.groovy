@@ -130,7 +130,7 @@ def updateNoonlightToken() {
   log.debug "Updating Noonlight Token"
   state.noonlightToken = request.JSON.token
   state.noonlightTokenExpires = request.JSON.expires
-  return
+  return [success: true]
 }
 
 def createAlarm() {
