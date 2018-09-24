@@ -49,9 +49,11 @@ def pageConfiguration() {
   dynamicPage(name: "pageConfiguration") {
     if(!validNoonlightToken()) {
       section {
-        paragraph(
-          "<a href='${authBrokerUri()}?hub_id=${hubUID}&app_id=${app.id}&api_host=${getApiServerUrl()}&access_token=${state.accessToken}' target='_blank'>Connect Noonlight</a>"
-        )
+        paragraph("""
+          <a href='${authBrokerUri()}?hub_id=${hubUID}&app_id=${app.id}&api_host=${getApiServerUrl()}&access_token=${state.accessToken}' target='_blank'>
+            <img width="241" height="48" src="https://s3.amazonaws.com/konnected-noonlight/connect-noonlight-blue.png"/>
+		  </a>
+        """)
       }
     } else {
       section {
@@ -277,11 +279,11 @@ def collectCurrentStates() {
 
 def allDevices() {
   return (
-  	motionSensors +
-  	contactSensors +
-    smokeDetectors +
-    tempSensors +
-    presenceSensors).unique{ d -> d.id }
+  	motionSensors ?: [] +
+    contactSensors ?: [] +
+    smokeDetectors ?: [] +
+    tempSensors ?: [] +
+    presenceSensors ?: []).unique{ d -> d.id }
 }
 
 def collectRecentEvents() {
@@ -290,7 +292,9 @@ def collectRecentEvents() {
     fiveMinutesAgo = fiveMinutesAgo - 5.minutes
   }
 
-  def allEvents = allDevices().eventsSince(fiveMinutesAgo)
+  def allEvents = allDevices().collect {
+    it.eventsSince(fiveMinutesAgo)
+  }
 
   return allEvents.flatten().findAll { it.isStateChange() && it.source == 'DEVICE' }.collect {
   	eventFormatter(it)
