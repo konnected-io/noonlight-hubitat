@@ -19,12 +19,12 @@ import groovy.json.JsonOutput
 public static String version() { return "1.0.0" }
 
 // Live
-//public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
-//public static String authBrokerUri() { return "https://noonlight.konnected.io/st/auth/" }
+// public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
+// public static String authBrokerUri() { return "https://noonlight.konnected.io/he/auth/" }
 
 // Sandbox
- public static String noonlightApiBase() { return "https://${api_host}/${hub_id}/apps/${app_id}/noonlight/token" }
- public static String authBrokerUri() { return "https://konnected-noonlight.herokuapp.com/he/auth?hub_id=${hub_id}&app_id=${app_id}&api_host=${api_host}&access_token=${state.accessToken}" }
+public static String noonlightApiBase() { return "https://api-sandbox.safetrek.io/v1/" }
+public static String authBrokerUri() { return "https://konnected-noonlight.herokuapp.com/he/auth/" }
 
 definition(
     name: "Noonlight",
@@ -46,24 +46,17 @@ preferences {
 
 def pageConfiguration() {
   if(!state.accessToken) { createAccessToken() }
+  dynamicPage(name: "pageConfiguration") {
     if(!validNoonlightToken()) {
-      dynamicPage(name: "pageConfiguration") {
-        section {
-          href(
-            name:        "oauth_init",
-            image:       "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png",
-            title:       "Connect Noonlight",
-            description: "Sign in or sign up to get started",
-            url:         "${authBrokerUri()}?app_id=${app_id}&api_host=${getApiServerUrl}&access_token=${state.accessToken}",
-            style: "embedded"
-          )
-        }
+      section {
+        paragraph(
+          "<a href='${authBrokerUri()}?hub_id=${hubUID}&app_id=${app.id}&api_host=${getApiServerUrl()}&access_token=${state.accessToken}' target='_blank'>Connect Noonlight</a>"
+        )
       }
-  } else {
-    page(name: "pageConfiguration") {
-      section("Configuration") {
-        paragraph "You are connected to Noonlight!",
-          image:  "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
+    } else {
+      section {
+        paragraph("You are connected to Noonlight!",
+          image:       "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
       }
 
       section("Sensors") {
@@ -102,6 +95,7 @@ def pageConfiguration() {
     }
   }
 }
+
 
 def installed() {
   log.debug "Installed with settings: ${settings}"
