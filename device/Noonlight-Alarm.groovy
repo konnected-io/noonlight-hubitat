@@ -14,7 +14,7 @@
  *
  */
 metadata {
-  definition (name: "Noonlight Alarm", namespace: "konnected-io", author: "konnected.io", mnmn: "SmartThings", vid: "generic-siren") {
+  definition (name: "Noonlight Alarm", namespace: "konnected-io", author: "konnected.io") {
     capability "Alarm"
     capability "Switch"
   }
@@ -23,7 +23,7 @@ metadata {
 }
 
 def off() {
-  // Canceling the alarm from SmartThings is currently disabled for your safety.
+  // Canceling the alarm from Hubitat is currently disabled for your safety.
   // A Noonlight agent will contact the account owner who can cancel the alarm with his/her PIN.
   //
   // parent.cancelAlarm()
