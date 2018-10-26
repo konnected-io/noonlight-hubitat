@@ -20,11 +20,11 @@ public static String version() { return "1.0.0" }
 
 // Live
 // public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
-// public static String authBrokerUri() { return "https://noonlight.konnected.io/he/auth/" }
+// public static String authBrokerBase() { return "https://noonlight.konnected.io/he/auth/" }
 
 // Sandbox
 public static String noonlightApiBase() { return "https://api-sandbox.safetrek.io/v1/" }
-public static String authBrokerUri() { return "https://konnected-noonlight.herokuapp.com/he/auth/" }
+public static String authBrokerBase() { return "https://konnected-noonlight.herokuapp.com/he/" }
 
 definition(
     name: "Noonlight",
@@ -34,65 +34,64 @@ definition(
     category: "Safety & Security",
     iconUrl: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white1x.png",
     iconX2Url: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png",
-    iconX3Url: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png")
-
-mappings {
-  path("/noonlight/token") { action: [ POST: "updateNoonlightToken"] }
-}
+    iconX3Url: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white3x.png"
+)
 
 preferences {
-  page(name: "pageConfiguration", install: true, uninstall: true, content: "pageConfiguration")
-}
-
-def pageConfiguration() {
-  if(!state.accessToken) { createAccessToken() }
-  dynamicPage(name: "pageConfiguration") {
-    if(!validNoonlightToken()) {
-      section {
-        paragraph("""
-          <a href='${authBrokerUri()}?hub_id=${hubUID}&app_id=${app.id}&api_host=${getApiServerUrl()}&access_token=${state.accessToken}' target='_blank'>
-            <img width="241" height="48" src="https://s3.amazonaws.com/konnected-noonlight/connect-noonlight-blue.png"/>
-		  </a>
-        """)
-      }
-    } else {
-      section {
-        paragraph("You are connected to Noonlight!",
-          image:       "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
-      }
-
-      section("Sensors") {
+  page(name: "pageConnectNoonlight", install: false, uninstall: false, content: "pageConnectNoonlight", nextPage: "pageConfiguration")
+  page(name: "pageConfiguration", install: true, uninstall: true) {
+    section("Sensors") {
         paragraph "Noonlight will receive information from these devices when an alarm is triggered"
         input "contactSensors", "capability.contactSensor", title: "Doors & Windows", multiple: true, required: false
         input "motionSensors", "capability.motionSensor", title: "Motion Sensors", multiple: true, required: false
         input "smokeDetectors", "capability.smokeDetector", title: "Smoke Detectors", multiple: true, required: false
         input "coDetectors", "capability.carbonMonoxideDetector", title: "Carbon Monoxide Detectors", multiple: true, required: false
         input "tempSensors", "capability.temperatureMeasurement", title: "Temperature Sensors", multiple: true, required: false
-      }
+    }
 
-      section("Presence") {
+    section("Presence") {
         paragraph "Share Presence with Noonlight when there's an emergency so we know who is home"
         input "presenceSensors", "capability.presenceSensor", title: "Presence sensor(s)", multiple: true, required: false
-      }
+    }
 
-      section("What's next?") {
-        paragraph "Configure Smart Home Monitor to alert Noonlight in an emergency. Go to Smart Home Monitor > Configure > Security and/or Smoke > Alert with lights > Noonlight"
-        href(
-          title: "Tap to check your location setting",
-          description: "Noonlight will receive your home's geo-location when an alarm is triggered. Tap here to open to your home address in Google's reverse geocoder. If it's inaccurate, go to your SmartThing hub's settings to set location precisely.",
-          url: "https://google-developers.appspot.com/maps/documentation/utils/geocoder/#q=${location.getLatitude()},${location.getLongitude()}"
-        )
-      }
+    section("What's next?") {
+        paragraph "Configure Hubitat Safety Monitor to alert Noonlight in an emergency. Go to Hubitat Safety Monitor > Configure a mode > Siren Alerts > Noonlight"
+		paragraph("""<a href='https://google-developers.appspot.com/maps/documentation/utils/geocoder/#q=${location.getLatitude()},${location.getLongitude()}' target='_blank'>
+	Click here to check your geo-location setting in Google Maps
+</a>
+""")
+        paragraph "Noonlight will receive your home's geo-location when an alarm is triggered. Click the link above to open to your home address in Google's reverse geocoder. If it's inaccurate, go to your Hubitat hub's location settings to set location precisely."
+    }
 
-      section("How does Noonlight work?") {
+    section("How does Noonlight work?") {
         paragraph "Immediately after an alarm is triggered from your smart home, a certified Noonlight dispatcher will text and call you. If you’re unable to respond, or if you can confirm your emergency, they will send the appropriate first responders to your home."
         paragraph "False alarm? Simply cancel with your 4-digit Noonlight PIN when contacted."
-      }
+    }
 
-      section("About") {
+    section("About") {
         paragraph "This integration was created by Konnected and is powered by Noonlight."
         href(title: "Learn more at noonlight.com", url: "https://noonlight.com", description: "")
-        paragraph "Noonlight SmartApp v${version()}"
+        paragraph "Noonlight App v${version()}"
+    }
+  }
+}
+
+def pageConnectNoonlight() {
+  dynamicPage(name: "pageConnectNoonlight") {
+    if(!validNoonlightToken()) {
+      section {
+        paragraph("Click the button below to create and authorize your Noonlight account.")
+        paragraph("""
+          <a href='${authBrokerBase()}auth?hub_id=${hubUID}&app_id=${app.id}' target='_blank'>
+            <img width="241" height="48" src="https://s3.amazonaws.com/konnected-noonlight/connect-noonlight-blue.png"/>
+		  </a>
+        """)
+        input "secret", "string", title: "Paste the secret code generated from Noonlight here."
+      }
+    } else {
+      section {
+        paragraph("You are connected to Noonlight!",
+          image: "https://s3.amazonaws.com/konnected-noonlight/noonlight-symbol-white2x.png")
       }
     }
   }
@@ -124,13 +123,6 @@ def initialize() {
   runEvery1Minute(getAlarm)
   validNoonlightToken()
   childDeviceConfiguration()
-}
-
-def updateNoonlightToken() {
-  log.debug "Updating Noonlight Token"
-  state.noonlightToken = request.JSON.token
-  state.noonlightTokenExpires = request.JSON.expires
-  return [success: true]
 }
 
 def createAlarm() {
@@ -236,16 +228,30 @@ def validNoonlightToken() {
     def expire_date = Date.parse("yyyy-MM-dd'T'HH:mm:ss'Z'", state.noonlightTokenExpires)
     def expires_in = (expire_date.time - new Date().time)
     if (expires_in > 0) {
-    log.debug "Noonlight token is valid for $expires_in milliseconds"
+      log.debug "Noonlight token is valid for $expires_in milliseconds"
+      if (expires_in < 7200000) { refreshNoonlightToken() }
       return true
     } else {
       log.debug "Noonlight token has expired!"
+      refreshNoonlightToken()
       return false
     }
   } else {
     log.debug "Noonlight token is not set!"
+    refreshNoonlightToken()
     return false
   }
+}
+
+def refreshNoonlightToken() {
+    httpPost(
+    	uri: "${authBrokerBase()}token",
+        body: [hub_id: hubUID, app_id: app.id, secret: settings.secret]
+    ) { response ->
+      	state.noonlightToken = response.data.token
+  	  	state.noonlightTokenExpires = response.data.expires
+      	log.debug "Noonlight token was refreshed and now expires at ${expires}"
+    }
 }
 
 def childDeviceConfiguration() {
