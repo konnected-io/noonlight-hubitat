@@ -23,8 +23,8 @@ public static String version() { return "1.0.0" }
 // public static String authBrokerBase() { return "https://noonlight.konnected.io/he/auth/" }
 
 // Sandbox
-public static String noonlightApiBase() { return "https://api-sandbox.safetrek.io/v1/" }
-public static String authBrokerBase() { return "https://konnected-noonlight.herokuapp.com/he/" }
+public static String noonlightApiBase() { return "https://api-sandbox.noonlight.com/platform/v1/" }
+public static String authBrokerBase() { return "https://aki7yd9u0m.execute-api.us-east-1.amazonaws.com/dev/he/" }
 
 definition(
     name: "Noonlight",
@@ -206,7 +206,7 @@ def processNoonlightResponse(data) {
 
 def sendEventsToNoonlight(events) {
   def events_params = [
-    uri: noonlightApiBase() + 'st-events',
+    uri: noonlightApiBase() + 'he-events',
     body: events.unique(),
     headers: ['Authorization': "Bearer ${state.noonlightToken}"]
   ]
@@ -225,10 +225,12 @@ def sendEventsToNoonlight(events) {
 
 def validNoonlightToken() {
   if (state.noonlightToken) {
-    def expire_date = Date.parse("yyyy-MM-dd'T'HH:mm:ss'Z'", state.noonlightTokenExpires)
+    def expire_date = Date.parse("yyyy-MM-dd'T'HH:mm:ss.SSSX", state.noonlightTokenExpires)
     def expires_in = (expire_date.time - new Date().time)
     if (expires_in > 0) {
-      log.debug "Noonlight token is valid for $expires_in milliseconds"
+	  def hrs = (expires_in / (3600000)) as Integer
+	  def mins = ((expires_in - (hrs * 3600000)) / 60000) as Integer
+	  log.debug "Noonlight token is valid for ${hrs}h ${mins}m"
       if (expires_in < 7200000) { refreshNoonlightToken() }
       return true
     } else {
@@ -244,13 +246,15 @@ def validNoonlightToken() {
 }
 
 def refreshNoonlightToken() {
-    httpPost(
-    	uri: "${authBrokerBase()}token",
-        body: [hub_id: hubUID, app_id: app.id, secret: settings.secret]
-    ) { response ->
-      	state.noonlightToken = response.data.token
-  	  	state.noonlightTokenExpires = response.data.expires
-      	log.debug "Noonlight token was refreshed and now expires at ${expires}"
+    if (settings.secret) {
+        httpPost(
+            uri: "${authBrokerBase()}token",
+            body: [hub_id: hubUID, app_id: app.id, secret: settings.secret]
+        ) { response ->
+            state.noonlightToken = response.data.token
+            state.noonlightTokenExpires = response.data.expires
+            log.debug "Noonlight token was refreshed and now expires at ${state.noonlightTokenExpires}"
+        }
     }
 }
 
@@ -263,7 +267,7 @@ def childDeviceConfiguration() {
 def payloadFor(device, attr) {
   def st = device.currentState(attr)
   return [
-  	timestamp: st.date.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+  	timestamp: st.date.format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone('UTC')),
     device_id: device.id,
     device_model: device.modelName,
     device_manufacturer: device.manufacturerName,
@@ -309,7 +313,7 @@ def collectRecentEvents() {
 
 def eventFormatter(evt) {
   return [
-    timestamp: evt.date.format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
+    timestamp: evt.date.format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone('UTC')),
     device_id: evt.deviceId,
     device_model: evt.device.modelName,
     device_manufacturer: evt.device.manufacturerName,
