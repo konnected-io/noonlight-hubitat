@@ -16,7 +16,7 @@
 import groovy.time.TimeCategory
 import groovy.json.JsonOutput
 
-public static String version() { return "1.0.0" }
+public static String version() { return "1.1.0.sandbox" }
 
 // Live
 // public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
@@ -70,7 +70,7 @@ preferences {
 
     section("About") {
         paragraph "This integration was created by Konnected and is powered by Noonlight."
-        href(title: "Learn more at noonlight.com", url: "https://noonlight.com", description: "")
+        paragraph "<a href='https://noonlight.com' target='_blank'>Learn more at noonlight.com</a>"
         paragraph "Noonlight App v${version()}"
     }
   }
