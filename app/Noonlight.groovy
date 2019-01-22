@@ -16,15 +16,15 @@
 import groovy.time.TimeCategory
 import groovy.json.JsonOutput
 
-public static String version() { return "1.1.0.sandbox" }
+public static String version() { return "1.1.0" }
 
 // Live
-// public static String noonlightApiBase() { return "https://api.safetrek.io/v1/" }
-// public static String authBrokerBase() { return "https://noonlight.konnected.io/he/auth/" }
+public static String noonlightApiBase() { return "https://api.noonlight.com/platform/v1/" }
+public static String authBrokerBase() { return "https://noonlight.konnected.io/he/" }
 
 // Sandbox
-public static String noonlightApiBase() { return "https://api-sandbox.noonlight.com/platform/v1/" }
-public static String authBrokerBase() { return "https://aki7yd9u0m.execute-api.us-east-1.amazonaws.com/dev/he/" }
+// public static String noonlightApiBase() { return "https://api-sandbox.noonlight.com/platform/v1/" }
+// public static String authBrokerBase() { return "https://aki7yd9u0m.execute-api.us-east-1.amazonaws.com/dev/he/" }
 
 definition(
     name: "Noonlight",
@@ -86,7 +86,7 @@ def pageConnectNoonlight() {
             <img width="241" height="48" src="https://s3.amazonaws.com/konnected-noonlight/connect-noonlight-blue.png"/>
 		  </a>
         """)
-        input "secret", "string", title: "Paste the secret code generated from Noonlight here."
+        input "secret", "string", title: "Paste the secret code generated from Noonlight here.", required: true
       }
     } else {
       section {
